@@ -29,12 +29,6 @@
 
 #include "evdev-mt-touchpad.h"
 
-
-// HIER IRGENDEINE ZAHL EINGEBEN; DAMIT DIE VARIABLE EINEN WERT HAT
-#define RICHARD_WOFF 100000
-
-
-
 #define DEFAULT_TAP_TIMEOUT_PERIOD ms2us(180)
 #define DEFAULT_DRAG_TIMEOUT_PERIOD_BASE ms2us(160)
 #define DEFAULT_DRAG_TIMEOUT_PERIOD_PERFINGER ms2us(20)
@@ -328,33 +322,18 @@ tp_tap_tapped_handle_event(struct tp_dispatch *tp,
 	case TAP_EVENT_RELEASE:
 		log_tap_bug(tp, t, event);
 		break;
-  case TAP_EVENT_TOUCH: {
-    // now = get_time()
-    // delta = now - time_since_last_press
-    // if (delta < 20ms) {
-	
-	// RICHARD WAR HIER 😔😔😔😔
-    
-	//EVTL ersetzen durch	 	tap.saved_release_time
-	uint64_t delta = time - tp->tap.saved_press_time;
-    if (delta < RICHARD_WOFF) {
-      return;
-      // tp->tap.state = TAP_STATE_IDLE;
-      // tp->tap.saved_press_time = time;
-    }
-    enum tp_tap_state dest[3] = {
-      TAP_STATE_1FGTAP_DRAGGING_OR_DOUBLETAP,
-      TAP_STATE_2FGTAP_DRAGGING_OR_DOUBLETAP,
-      TAP_STATE_3FGTAP_DRAGGING_OR_DOUBLETAP,
-    };
-    assert(nfingers_tapped >= 1 && nfingers_tapped <= 3);
-    tp->tap.state = dest[nfingers_tapped - 1];
-    tp->tap.saved_press_time = time;
-    tp_tap_set_timer(tp, time);
-    break;
-  }
-
-
+	case TAP_EVENT_TOUCH: {
+		enum tp_tap_state dest[3] = {
+			TAP_STATE_1FGTAP_DRAGGING_OR_DOUBLETAP,
+			TAP_STATE_2FGTAP_DRAGGING_OR_DOUBLETAP,
+			TAP_STATE_3FGTAP_DRAGGING_OR_DOUBLETAP,
+		};
+		assert(nfingers_tapped >= 1 && nfingers_tapped <= 3);
+		tp->tap.state = dest[nfingers_tapped - 1];
+		tp->tap.saved_press_time = time;
+		tp_tap_set_timer(tp, time);
+		break;
+	}
 	case TAP_EVENT_TIMEOUT:
 		tp->tap.state = TAP_STATE_IDLE;
 		tp_tap_notify(tp,
